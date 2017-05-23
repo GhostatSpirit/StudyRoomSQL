@@ -1,0 +1,22 @@
+Views:
+detailedOrder		details about all orders (a large joined table)
+usableSlots		all slots that are not blocked by the admin
+
+
+Procedures:
+addSlots		add slots (daily routine)
+BeMember		join a order, so that the user can enter the room
+CreateOrder		create an order with a number of slots
+searchSlots		search slots by library, date, and time
+showManagerOrders	filter all orders by status
+showUserOrders		filter all orders by user
+
+
+Functions:
+CheckSlot		Helper funtion
+EnterRoom		Check whether a spec user can enter a spec room at a spec time
+getScore		Calculate the score of a user using geometric mean method
+LoginUser		Check username and password
+setOrderScore		Set the score of an order
+setOrderStatus		Set the review status of an order
+setSlotUsable		Make a slot under maintenance
