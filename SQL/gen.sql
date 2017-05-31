@@ -128,7 +128,6 @@ DELIMITER $$
 
 -- Yang Liu
 
-DELIMITER $$
 DROP FUNCTION IF EXISTS srCheckSlot$$
 CREATE FUNCTION srCheckSlot(_slotId INT)
 	RETURNS INT
@@ -162,11 +161,8 @@ BEGIN
     -- WHERE Slot.slotId = _slotId;
 	RETURN 1;
 
-END;
-$$
-DELIMITER ;
+END$$
 
-DELIMITER $$
 DROP PROCEDURE IF EXISTS srCreateOrder$$
 -- CAUTION: make sure this proceudre is executed within a transaction
 CREATE PROCEDURE srCreateOrder(
@@ -291,36 +287,33 @@ BEGIN
 	INSERT INTO asMember(orderId, userId) VALUES(newOrderId, _applicantId);
     SET _outOrderId = newOrderId;
 
-END
-$$
-DELIMITER ;
+END$$
 
 
 
 -- Junyi Liu
-DELIMITER $$
 CREATE
 VIEW `detailedorder` AS
     SELECT
-        `asmember`.`orderId` AS `orderId`,
-        `roomorder`.`applicantId` AS `applicantId`,
-        `roomorder`.`roomId` AS `roomId`,
-        `roomorder`.`reviewerId` AS `reviewerId`,
-        `roomorder`.`scorerId` AS `scorerId`,
-        `roomorder`.`memberNum` AS `memberNum`,
-        `roomorder`.`status` AS `status`,
-        `roomorder`.`isPublic` AS `isPublic`,
-        `roomorder`.`orderPassword` AS `orderPassword`,
-        `roomorder`.`score` AS `score`,
-        `roomorder`.`startTime` AS `startTime`,
-        `roomorder`.`endTime` AS `endTime`,
-        COUNT(`asmember`.`userId`) AS `inMemNum`
+        `asMember`.`orderId` AS `orderId`,
+        `RoomOrder`.`applicantId` AS `applicantId`,
+        `RoomOrder`.`roomId` AS `roomId`,
+        `RoomOrder`.`reviewerId` AS `reviewerId`,
+        `RoomOrder`.`scorerId` AS `scorerId`,
+        `RoomOrder`.`memberNum` AS `memberNum`,
+        `RoomOrder`.`status` AS `status`,
+        `RoomOrder`.`isPublic` AS `isPublic`,
+        `RoomOrder`.`orderPassword` AS `orderPassword`,
+        `RoomOrder`.`score` AS `score`,
+        `RoomOrder`.`startTime` AS `startTime`,
+        `RoomOrder`.`endTime` AS `endTime`,
+        COUNT(`asMember`.`userId`) AS `inMemNum`
     FROM
-        (`roomorder`
-        JOIN `asmember` ON ((`roomorder`.`orderId` = `asmember`.`orderId`)))
+        (`RoomOrder`
+        JOIN `asMember` ON ((`RoomOrder`.`orderId` = `asMember`.`orderId`)))
     WHERE
         1
-    GROUP BY `asmember`.`orderId`
+    GROUP BY `asMember`.`orderId`
 $$
 
 
