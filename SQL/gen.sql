@@ -413,6 +413,39 @@ if inStatus < 0 then
     end if;
 END$$
 
+CREATE PROCEDURE `createADaySlots`(toDoDay date, inStartTime time, inEndTime time, gap int)
+BEGIN
+    declare ittime datetime;
+    declare stoptime datetime;
+    set ittime=cast(CONCAT(toDoday,' ',inStartTime) as datetime);
+    set stoptime=cast(CONCAT(toDoday,' ',inEndTime) as datetime);
+
+    create temporary table if not exists daySlot (
+        startTime datetime,
+        endTime datetime
+    );
+    truncate TABLE daySlot;
+
+    while date_add(ittime, interval gap minute)<= stopTime do 
+        insert into daySlot values (ittime,date_add(ittime, interval gap minute));
+        set ittime=date_add(ittime, interval gap minute);
+    end while;
+
+    insert into Slot(roomId,slotDate,startTime,endTime,isUsable)
+    select roomId, toDoDay, startTime, endTime,1
+    from Room join daySlot;
+END$$
+
+
+CREATE PROCEDURE `naiveSlotRetire`(requestDate date)
+BEGIN
+    insert into oldSlot
+    select * from Slot
+    where Slot.slotDate=requestDate;
+    delete from Slot
+    where Slot.slotDate=requestDate;
+END$$
+
 -- Ye Wu
 
 create Function setOrderScore (targetOrderId int, targetUserId int, judgeScore int) returns int
