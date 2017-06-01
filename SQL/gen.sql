@@ -257,7 +257,11 @@ BEGIN
 
     -- generate randomized 6-digit order password:
     -- [100000, 999999]
-    SET orderPwd = FLOOR(RAND()*(999999 - 100000 + 1)) + 100000;
+    -- SET orderPwd = FLOOR(RAND()*(999999 - 100000 + 1)) + 100000;
+
+    -- for simplicity of testing, generate 0/1 password instead
+    SET orderPwd = FLOOR(RAND()*2);
+
     -- create order (default status value is 0)
     -- and store its order id
     INSERT INTO
