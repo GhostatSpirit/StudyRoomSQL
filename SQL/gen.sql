@@ -70,6 +70,7 @@ create table Slot
    slotId               int not null auto_increment,
    roomId               int not null,
    orderId              int,
+   slotDate             date not null,
    startTime            datetime not null,
    endTime              datetime not null,
    isUsable             bool not null,
