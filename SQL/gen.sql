@@ -129,6 +129,10 @@ alter table asMember add constraint FK_asMember2 foreign key (userId)
 ALTER TABLE `Slot` 
 ADD INDEX `dateIndex` USING BTREE (`slotDate` ASC);
 
+ALTER TABLE `lvzheng_studyroom`.`asMember` 
+ADD INDEX `orderidIndex` USING BTREE (`orderId` ASC);
+
+
 
 DELIMITER $$
 
