@@ -12,12 +12,14 @@ def randuser():
     return random.randint(1, 999)
 
 i = 0
+base = 0
 for day in range(0, 365):
     for h in range(0, 28, 4):
         for room in range(1, 31):
             i += 1
-            base = (day * 28 * 30) + h * 30 + room
-            s = "%d,%d,%d,%d" % (base, base + 30, base + 60, base + 90)
+            base += 4
+            #base = (day * 28 * 30) + h * 28 + room
+            s = "%d,%d,%d,%d" % (base, base + 1, base + 2, base + 3)
             print(ptn1 % (randuser(), s))
             print("SELECT 1;")
             print(ptn2 % (randuser(), i))
