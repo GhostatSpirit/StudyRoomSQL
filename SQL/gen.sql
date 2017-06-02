@@ -330,35 +330,35 @@ $$
 CREATE 
 VIEW `usableslots` AS
     SELECT 
-        `detailedroom`.`libraryId` AS `libraryId`,
-        `detailedroom`.`libraryName` AS `libraryName`,
-        `detailedroom`.`roomId` AS `roomId`,
-        `detailedroom`.`roomName` AS `roomName`,
-        `usableslotsets`.`slotDate` AS `slotDate`,
-        `usableslotsets`.`startTime` AS `startTime`,
-        `usableslotsets`.`endTime` AS `endTime`,
-        ISNULL(`usableslotsets`.`orderId`) AS `available`
+        `detailedRoom`.`libraryId` AS `libraryId`,
+        `detailedRoom`.`libraryName` AS `libraryName`,
+        `detailedRoom`.`roomId` AS `roomId`,
+        `detailedRoom`.`roomName` AS `roomName`,
+        `usableSlotsets`.`slotDate` AS `slotDate`,
+        `usableSlotsets`.`startTime` AS `startTime`,
+        `usableSlotsets`.`endTime` AS `endTime`,
+        ISNULL(`usableSlotsets`.`orderId`) AS `available`
     FROM
         (((SELECT 
-            `studyroom`.`slot`.`roomId` AS `roomId`,
-                `studyroom`.`slot`.`slotDate` AS `slotDate`,
-                `studyroom`.`slot`.`startTime` AS `startTime`,
-                `studyroom`.`slot`.`endTime` AS `endTime`,
-                `studyroom`.`slot`.`orderId` AS `orderId`
+            `Slot`.`roomId` AS `roomId`,
+                .`Slot`.`slotDate` AS `slotDate`,
+                .`Slot`.`startTime` AS `startTime`,
+                .`Slot`.`endTime` AS `endTime`,
+                .`Slot`.`orderId` AS `orderId`
         FROM
-            `studyroom`.`slot`
+            `Slot`
         WHERE
-            (`studyroom`.`slot`.`isUsable` = 1))) `usableSlotsets`
+            (`Slot`.`isUsable` = 1))) `usableSlotsets`
         JOIN (SELECT 
-            `studyroom`.`room`.`roomId` AS `roomId`,
-                `studyroom`.`room`.`libraryId` AS `libraryId`,
-                `studyroom`.`library`.`libraryName` AS `libraryName`,
-                `studyroom`.`room`.`roomName` AS `roomName`
+            `Room`.`roomId` AS `roomId`,
+                `Room`.`libraryId` AS `libraryId`,
+                `Library`.`libraryName` AS `libraryName`,
+                `Room`.`roomName` AS `roomName`
         FROM
-            (`studyroom`.`room`
-        JOIN `studyroom`.`library` ON ((`studyroom`.`room`.`libraryId` = `studyroom`.`library`.`libraryId`)))
+            (`Room`
+        JOIN `Library` ON ((`Room`.`libraryId` = `Library`.`libraryId`)))
         WHERE
-            1) `detailedRoom` ON ((`usableslotsets`.`roomId` = `detailedroom`.`roomId`)))
+            1) `detailedRoom` ON ((`usableSlotsets`.`roomId` = `detailedRoom`.`roomId`)))
     WHERE
         1
 $$
