@@ -124,6 +124,11 @@ alter table asMember add constraint FK_asMember foreign key (orderId)
 
 alter table asMember add constraint FK_asMember2 foreign key (userId)
       references User (userId) on delete restrict on update restrict;
+      
+-- index
+ALTER TABLE `Slot` 
+ADD INDEX `dateIndex` USING BTREE (`slotDate` ASC);
+
 
 DELIMITER $$
 
@@ -322,36 +327,38 @@ VIEW `detailedorder` AS
 $$
 
 
-CREATE
-VIEW `usableSlots` AS
-    SELECT
-        `detailedRoom`.`libraryId` AS `libraryId`,
-        `detailedRoom`.`libraryName` AS `libraryName`,
-        `detailedRoom`.`roomId` AS `roomId`,
-        `detailedRoom`.`roomName` AS `roomName`,
-        `usableSlotsets`.`startTime` AS `startTime`,
-        `usableSlotsets`.`endTime` AS `endTime`,
-        ISNULL(`usableSlotsets`.`orderId`) AS `available`
+CREATE 
+VIEW `usableslots` AS
+    SELECT 
+        `detailedroom`.`libraryId` AS `libraryId`,
+        `detailedroom`.`libraryName` AS `libraryName`,
+        `detailedroom`.`roomId` AS `roomId`,
+        `detailedroom`.`roomName` AS `roomName`,
+        `usableslotsets`.`slotDate` AS `slotDate`,
+        `usableslotsets`.`startTime` AS `startTime`,
+        `usableslotsets`.`endTime` AS `endTime`,
+        ISNULL(`usableslotsets`.`orderId`) AS `available`
     FROM
-        (((SELECT
-            `Slot`.`roomId` AS `roomId`,
-                `Slot`.`startTime` AS `startTime`,
-                `Slot`.`endTime` AS `endTime`,
-                `Slot`.`orderId` AS `orderId`
+        (((SELECT 
+            `studyroom`.`slot`.`roomId` AS `roomId`,
+                `studyroom`.`slot`.`slotDate` AS `slotDate`,
+                `studyroom`.`slot`.`startTime` AS `startTime`,
+                `studyroom`.`slot`.`endTime` AS `endTime`,
+                `studyroom`.`slot`.`orderId` AS `orderId`
         FROM
-            `Slot`
+            `studyroom`.`slot`
         WHERE
-            (`Slot`.`isUsable` = 1))) `usableSlotsets`
-        JOIN (SELECT
-            `Room`.`roomId` AS `roomId`,
-                `Room`.`libraryId` AS `libraryId`,
-                `Library`.`libraryName` AS `libraryName`,
-                `Room`.`roomName` AS `roomName`
+            (`studyroom`.`slot`.`isUsable` = 1))) `usableSlotsets`
+        JOIN (SELECT 
+            `studyroom`.`room`.`roomId` AS `roomId`,
+                `studyroom`.`room`.`libraryId` AS `libraryId`,
+                `studyroom`.`library`.`libraryName` AS `libraryName`,
+                `studyroom`.`room`.`roomName` AS `roomName`
         FROM
-            (`Room`
-        JOIN `Library` ON ((`Room`.`libraryId` = `Library`.`libraryId`)))
+            (`studyroom`.`room`
+        JOIN `studyroom`.`library` ON ((`studyroom`.`room`.`libraryId` = `studyroom`.`library`.`libraryId`)))
         WHERE
-            1) `detailedRoom` ON ((`usableSlotsets`.`roomId` = `detailedRoom`.`roomId`)))
+            1) `detailedRoom` ON ((`usableslotsets`.`roomId` = `detailedroom`.`roomId`)))
     WHERE
         1
 $$
@@ -364,13 +371,13 @@ END$$
 
 CREATE PROCEDURE `searchSlots`(libraryId int, thedate date, startTime datetime, endTime datetime)
 begin
-	select * from usableSlots okSlots
+	select * from usableSlots okSlots 
 	where
 	(libraryId is null or okSlots.libraryId=libraryId)
-	and
-	(thedate is null or date_add(thedate, interval 1 day)>okSlots.endTime and thedate<okSlots.startTime)
-	and
-	(startTime is null and endTime is null
+	and 
+	(thedate is null or thedate=okSlots.slotDate)
+	and 
+	(startTime is null and endTime is null 
 	or  startTime <= okSlots.startTime and endTime >= okSlots.endTime);
 end$$
 
