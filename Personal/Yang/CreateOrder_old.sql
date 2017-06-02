@@ -1,57 +1,6 @@
 -- Author: Yang Liu
 -- Email: lykavin@hotmail.com
 
--- ----------------------------
---  Procedure structure for `sp_split`
--- ----------------------------
-DROP PROCEDURE IF EXISTS `sp_split`;
-delimiter ;;
-CREATE PROCEDURE `sp_split`(IN toSplit text, IN target char(255))
-BEGIN
-	# Temp table variables
-	SET @tableName = 'tmpSplit';
-	SET @fieldName = 'variable';
-
-	# Dropping table
-	SET @sql := CONCAT('DROP TABLE IF EXISTS ', @tableName);
-	PREPARE stmt FROM @sql;
-	EXECUTE stmt;
-	DEALLOCATE PREPARE stmt;
-
-	# Creating table
-	SET @sql := CONCAT('CREATE TEMPORARY TABLE ', @tableName, ' (', @fieldName, ' INT)');
-	PREPARE stmt FROM @sql;
-	EXECUTE stmt;
-	DEALLOCATE PREPARE stmt;
-
-	# Preparing toSplit
-	SET @vars := toSplit;
-	SET @vars := CONCAT("('", REPLACE(@vars, ",", "'),('"), "')");
-
-	# Inserting values
-	SET @sql := CONCAT('INSERT INTO ', @tableName, ' VALUES ', @vars);
-	PREPARE stmt FROM @sql;
-	EXECUTE stmt;
-	DEALLOCATE PREPARE stmt;
-
-	# Returning record set, or inserting into optional target
-	IF target IS NULL THEN
-		SET @sql := CONCAT('SELECT TRIM(`', @fieldName, '`) AS `', @fieldName, '` FROM ', @tableName);
-	ELSE
-		SET @sql := CONCAT('INSERT INTO ', target, ' SELECT TRIM(`', @fieldName, '`) FROM ', @tableName);
-	END IF;
-
-	PREPARE stmt FROM @sql;
-	EXECUTE stmt;
-	DEALLOCATE PREPARE stmt;
-
-END
- ;;
-delimiter ;
-
-
-
-
 DELIMITER $$
 -- DROP FUNCTION IF EXISTS srCheckSlot$$
 -- CREATE FUNCTION srCheckSlot(_isUsable bool)
@@ -109,6 +58,7 @@ BEGIN
     DECLARE orderPwd INT;
 
 	DROP TEMPORARY TABLE IF EXISTS SlotList;
+
 	CREATE TEMPORARY TABLE SlotList(
 		slotId INT,
 		roomId INT,
@@ -118,14 +68,11 @@ BEGIN
 		orderId INT
 	);
 
-    
-	CALL sp_split(_slotIdStr, "slotIdList");
-
 	INSERT INTO SlotList(slotId, roomId, startTime, endTime, isUsable, orderId)
 		SELECT Slot.slotId, Slot.roomId, Slot.startTime,
 		       Slot.endTime, Slot.isUsable, Slot.orderId
 		FROM Slot
-		WHERE Slot.slotId in (SELECT * FROM slotIdList);
+		WHERE FIND_IN_SET(Slot.slotId, _slotIdStr);
 
 	IF NOT EXISTS (SELECT NULL FROM SlotList) THEN
 		-- cannot parse _slotIdStr OR cannot find slotId in Slot
