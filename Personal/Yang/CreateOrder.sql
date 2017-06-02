@@ -110,7 +110,7 @@ BEGIN
 
 	DROP TEMPORARY TABLE IF EXISTS SlotList;
 	CREATE TEMPORARY TABLE SlotList(
-		slotId INT,
+		slotId INT PRIMARY KEY,
 		roomId INT,
 		startTime DATETIME,
 		endTime DATETIME,
@@ -120,7 +120,7 @@ BEGIN
 
 	DROP TEMPORARY TABLE IF EXISTS slotIdList;
 	CREATE TEMPORARY TABLE slotIdList(
-		slotId INT
+		slotId INT PRIMARY KEY
 	);
 
 	CALL sp_split(_slotIdStr, "slotIdList");
@@ -174,8 +174,7 @@ BEGIN
     SET newOrderId = LAST_INSERT_ID();
 
     -- set orderId for corresponding slots in Slot TABLE
-	UPDATE Slot SET Slot.orderId = newOrderId
-	WHERE Slot.SlotId IN (SELECT SlotList.SlotId FROM SlotList);
+    UPDATE Slot JOIN SlotList ON SlotList.slotId = Slot.SlotId SET Slot.orderId = @newOrderId;
 
 
 	INSERT INTO asMember(orderId, userId) VALUES(newOrderId, _applicantId);
