@@ -118,7 +118,11 @@ BEGIN
 		orderId INT
 	);
 
-    
+	DROP TEMPORARY TABLE IF EXISTS slotIdList;
+	CREATE TEMPORARY TABLE slotIdList(
+		slotId INT
+	);
+
 	CALL sp_split(_slotIdStr, "slotIdList");
 
 	INSERT INTO SlotList(slotId, roomId, startTime, endTime, isUsable, orderId)
