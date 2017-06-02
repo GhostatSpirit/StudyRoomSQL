@@ -303,7 +303,7 @@ END$$
 
 -- Junyi Liu
 CREATE
-VIEW `detailedorder` AS
+VIEW `detailedOrder` AS
     SELECT
         `asMember`.`orderId` AS `orderId`,
         `RoomOrder`.`applicantId` AS `applicantId`,
@@ -328,7 +328,7 @@ $$
 
 
 CREATE 
-VIEW `usableslots` AS
+VIEW `usableSlots` AS
     SELECT 
         `detailedRoom`.`libraryId` AS `libraryId`,
         `detailedRoom`.`libraryName` AS `libraryName`,
