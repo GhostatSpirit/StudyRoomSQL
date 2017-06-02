@@ -54,8 +54,6 @@ BEGIN
 	DECLARE orderEndTime DATETIME;
 	DECLARE orderRoomId INT;
 
-    DECLARE slotsReservable BOOL;
-
     DECLARE newOrderId INT;
     DECLARE orderPwd INT;
 
