@@ -1,0 +1,13 @@
+StudyRoom Database Project
+
+Directory structure:
+
+SQL/gen.sql		The sole neccessary SQL script for generating the schema.
+DataGen/putdata.sql	The SQL script for generating base data.
+DataGen/genordersql.py	The SQL script for generating massive orders for benchmarking.
+
+Author:
+Junyi Liu
+Yang Liu
+Ye Wu
+Zheng Lv
