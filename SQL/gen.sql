@@ -613,7 +613,7 @@ proc:BEGIN
 		LEAVE proc;
 	END IF;
 	INSERT INTO asMember (orderId, userId) VALUES (orderId, userId);
-    UPDATE RoomOrder SET inMemNum = inMemNum + 1 WHERE id = orderId;
+    UPDATE RoomOrder SET inMemNum = inMemNum + 1 WHERE RoomOrder.orderId = orderId;
 	SET success = 1;
 END$$
 
