@@ -109,7 +109,7 @@ CREATE TABLE `device` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `amount` int(11) NOT NULL,
-  `orderId` int(11) DEFAULT NULL,
+  `roomId` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
 
@@ -137,8 +137,8 @@ alter table asMember add constraint FK_asMember foreign key (orderId)
 alter table asMember add constraint FK_asMember2 foreign key (userId)
       references User (userId) on delete restrict on update restrict;
       
-alter table device add constraint FK_device foreign key (orderId)
-      references RoomOrder (orderId) on delete restrict on update restrict;
+alter table device add constraint FK_device foreign key (roomId)
+      references Room (roomId) on delete restrict on update restrict;
 
 -- index
 ALTER TABLE `Slot`
