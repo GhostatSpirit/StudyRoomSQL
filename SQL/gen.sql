@@ -59,6 +59,7 @@ create table RoomOrder
    isPublic             bool not null,
    orderPassword        varchar(255),
    score                int,
+   inMemNum             int NOT NULL DEFAULT 1,
    primary key (orderId)
 );
 
@@ -124,9 +125,9 @@ alter table asMember add constraint FK_asMember foreign key (orderId)
 
 alter table asMember add constraint FK_asMember2 foreign key (userId)
       references User (userId) on delete restrict on update restrict;
-      
+
 -- index
-ALTER TABLE `Slot` 
+ALTER TABLE `Slot`
 ADD INDEX `dateIndex` USING BTREE (`slotDate` ASC);
 
 
@@ -304,32 +305,33 @@ END$$
 -- Junyi Liu
 CREATE
 VIEW `detailedOrder` AS
-    SELECT
-        `asMember`.`orderId` AS `orderId`,
-        `RoomOrder`.`applicantId` AS `applicantId`,
-        `RoomOrder`.`roomId` AS `roomId`,
-        `RoomOrder`.`reviewerId` AS `reviewerId`,
-        `RoomOrder`.`scorerId` AS `scorerId`,
-        `RoomOrder`.`memberNum` AS `memberNum`,
-        `RoomOrder`.`status` AS `status`,
-        `RoomOrder`.`isPublic` AS `isPublic`,
-        `RoomOrder`.`orderPassword` AS `orderPassword`,
-        `RoomOrder`.`score` AS `score`,
-        `RoomOrder`.`startTime` AS `startTime`,
-        `RoomOrder`.`endTime` AS `endTime`,
-        COUNT(`asMember`.`userId`) AS `inMemNum`
-    FROM
-        (`RoomOrder`
-        JOIN `asMember` ON ((`RoomOrder`.`orderId` = `asMember`.`orderId`)))
-    WHERE
-        1
-    GROUP BY `asMember`.`orderId`
+    -- SELECT
+    --     `asMember`.`orderId` AS `orderId`,
+    --     `RoomOrder`.`applicantId` AS `applicantId`,
+    --     `RoomOrder`.`roomId` AS `roomId`,
+    --     `RoomOrder`.`reviewerId` AS `reviewerId`,
+    --     `RoomOrder`.`scorerId` AS `scorerId`,
+    --     `RoomOrder`.`memberNum` AS `memberNum`,
+    --     `RoomOrder`.`status` AS `status`,
+    --     `RoomOrder`.`isPublic` AS `isPublic`,
+    --     `RoomOrder`.`orderPassword` AS `orderPassword`,
+    --     `RoomOrder`.`score` AS `score`,
+    --     `RoomOrder`.`startTime` AS `startTime`,
+    --     `RoomOrder`.`endTime` AS `endTime`,
+    --     COUNT(`asMember`.`userId`) AS `inMemNum`
+    -- FROM
+    --     (`RoomOrder`
+    --     JOIN `asMember` ON ((`RoomOrder`.`orderId` = `asMember`.`orderId`)))
+    -- WHERE
+    --     1
+    -- GROUP BY `asMember`.`orderId`
+    SELECT * FROM RoomOrder
 $$
 
 
-CREATE 
+CREATE
 VIEW `usableSlots` AS
-    SELECT 
+    SELECT
         `detailedRoom`.`libraryId` AS `libraryId`,
         `detailedRoom`.`libraryName` AS `libraryName`,
         `detailedRoom`.`roomId` AS `roomId`,
@@ -339,7 +341,7 @@ VIEW `usableSlots` AS
         `usableSlotsets`.`endTime` AS `endTime`,
         ISNULL(`usableSlotsets`.`orderId`) AS `available`
     FROM
-        (((SELECT 
+        (((SELECT
             `Slot`.`roomId` AS `roomId`,
                 .`Slot`.`slotDate` AS `slotDate`,
                 .`Slot`.`startTime` AS `startTime`,
@@ -349,7 +351,7 @@ VIEW `usableSlots` AS
             `Slot`
         WHERE
             (`Slot`.`isUsable` = 1))) `usableSlotsets`
-        JOIN (SELECT 
+        JOIN (SELECT
             `Room`.`roomId` AS `roomId`,
                 `Room`.`libraryId` AS `libraryId`,
                 `Library`.`libraryName` AS `libraryName`,
@@ -371,13 +373,13 @@ END$$
 
 CREATE PROCEDURE `searchSlots`(libraryId int, thedate date, startTime datetime, endTime datetime)
 begin
-	select * from usableSlots okSlots 
+	select * from usableSlots okSlots
 	where
 	(libraryId is null or okSlots.libraryId=libraryId)
-	and 
+	and
 	(thedate is null or thedate=okSlots.slotDate)
-	and 
-	(startTime is null and endTime is null 
+	and
+	(startTime is null and endTime is null
 	or  startTime <= okSlots.startTime and endTime >= okSlots.endTime);
 end$$
 
@@ -419,7 +421,7 @@ END$$
 
 CREATE PROCEDURE `setOrderStatus` (inStatus int, orderId int)
 BEGIN
-update RoomOrder set status = inStatus where RoomOrder.orderId = orderId; 
+update RoomOrder set status = inStatus where RoomOrder.orderId = orderId;
 if inStatus < 0 then
 	update Slot slot set slot.orderId = null where slot.orderId= orderId;
     end if;
@@ -438,7 +440,7 @@ BEGIN
     );
     truncate TABLE daySlot;
 
-    while date_add(ittime, interval gap minute)<= stopTime do 
+    while date_add(ittime, interval gap minute)<= stopTime do
         insert into daySlot values (ittime,date_add(ittime, interval gap minute));
         set ittime=date_add(ittime, interval gap minute);
     end while;
@@ -491,7 +493,7 @@ BEGIN
 	IF _orderId = null THEN
 		RETURN false;
     END IF;
-    
+
 	UPDATE Slot set orderId = null where orderId = _orderId;
     RETURN true;
 END $$
@@ -501,17 +503,17 @@ BEGIN
 	declare setSlotSuccess bool default 0;
     declare oldSlotOrderId INT;
     declare retVal BOOL;
-    
+
     if(exists(select * from slot where slot.slotId = targetSlotId )) then
 		update slot set slot.isUsable = slotUsableStatus where slot.slotId = targetSlotId;
-        
+
         if slotUsableStatus = 0 then
 			SET oldSlotOrderId = (select orderId from Slot where slotId=targetSlotId);
 			update RoomOrder set status = -1 where orderId = oldSlotOrderId;
 			SET retVal = freeOrderSlots(oldSlotOrderId);
-            
+
         end if;
-        
+
 		set setSlotSuccess = 1; #  Scucess
     else
 		set setSlotSuccess = 0; #  Failure
@@ -523,15 +525,15 @@ create Function setOrderStatus(targetUserId int, targetOrderId int, targetOrderS
 BEGIN
 	declare setOrderSuccess bool default 0;
     declare retVal bool;
-    
+
     if(exists(select * from RoomOrder where RoomOrder.orderId = targetOrderId) && exists(select * from User where User.userId = targetUserId)) then
         update RoomOrder set RoomOrder.reviewerId = targetUserId where RoomOrder.orderId = targetOrderId;
         update RoomOrder set RoomOrder.status = targetOrderStatus where RoomOrder.orderId = targetOrderId;
-        
+
         IF targetOrderStatus < 0 THEN
 			SET retVal = freeOrderSlots(targetOrderId);
         END IF;
-        
+
         set setOrderSuccess = 1; #  Scucess
     else
 		set setOrderSuccess = 0; #  Failure
@@ -597,6 +599,7 @@ proc:BEGIN
 		LEAVE proc;
 	END IF;
 	INSERT INTO asMember (orderId, userId) VALUES (orderId, userId);
+    UPDATE RoomOrder SET inMemNum = inMemNum + 1 WHERE id = orderId;
 	SET success = 1;
 END$$
 
