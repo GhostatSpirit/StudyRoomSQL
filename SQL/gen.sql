@@ -101,6 +101,17 @@ create table asMember
    primary key (orderId, userId)
 );
 
+/*==============================================================*/
+/* Table: device                                              */
+/*==============================================================*/
+CREATE TABLE `device` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
+  `amount` int(11) NOT NULL,
+  `orderId` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+
 alter table Room add constraint FK_ownRoom foreign key (libraryId)
       references Library (libraryId) on delete restrict on update restrict;
 
@@ -125,6 +136,10 @@ alter table asMember add constraint FK_asMember foreign key (orderId)
 alter table asMember add constraint FK_asMember2 foreign key (userId)
       references User (userId) on delete restrict on update restrict;
       
+alter table device add constraint FK_device foreign key (orderId)
+      references RoomOrder (orderId) on delete restrict on update restrict;
+
+
 -- index
 ALTER TABLE `Slot` 
 ADD INDEX `dateIndex` USING BTREE (`slotDate` ASC);
